@@ -370,14 +370,14 @@ Blockly.Python['uno_json_member'] = function (block, opt_thisOnly) {
 };
 
 Blockly.Python['uno_json_index'] = function (block) {
-  Blockly.Python.definitions_['import_ujson'] = 'import ujson';
+  Blockly.Python.definitions_['import_json'] = 'import json';
   var input = Blockly.Python.valueToCode(block, 'INPUT', Blockly.Python.ORDER_ATOMIC);
   var find = Blockly.Python.valueToCode(block, 'FIND', Blockly.Python.ORDER_ATOMIC);
   // TODO: Assemble Python into code variable.
-  if (input.substring(1, 6) == "ujson") {
+  if (input.substring(1, 5) == "json") {
     var code = input + '[' + find + ']';
   } else {
-    var code = 'ujson.loads(' + input + ')[' + find + ']';
+    var code = 'json.loads(' + input + ')[' + find + ']';
   }
   return [code, Blockly.Python.ORDER_NONE];
 };

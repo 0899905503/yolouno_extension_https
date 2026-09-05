@@ -1,5 +1,5 @@
-import usocket
-import ure
+import socket
+import re
 
 # ============================================================
 # SAFE CALLBACK EXECUTION
@@ -66,8 +66,8 @@ class Response:
         return str(self.content, self.encoding)
 
     def json(self):
-        import ujson
-        return ujson.loads(self.content)
+        import json
+        return json.loads(self.content)
 
 
 # ============================================================
@@ -86,10 +86,7 @@ def request(method, url, params=None, cookies=None, data=None, json=None,
         if proto == "http:":
             port = 80
         elif proto == "https:":
-            try:
-                import ussl
-            except:
-                import ssl as ussl
+            import ssl
             port = 443
         else:
             raise ValueError("Unsupported protocol: " + proto)
@@ -98,18 +95,18 @@ def request(method, url, params=None, cookies=None, data=None, json=None,
             host, port = host.split(":", 1)
             port = int(port)
 
-        ai = usocket.getaddrinfo(host, port, 0, usocket.SOCK_STREAM)[0]
+        ai = socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM)[0]
 
         resp_d = {} if parse_headers else None
 
-        s = usocket.socket(ai[0], ai[1], ai[2])
+        s = socket.socket(ai[0], ai[1], ai[2])
         s.settimeout(60.0)
 
         try:
             s.connect(ai[-1])
             if proto == "https:":
-                import ussl
-                s = ussl.wrap_socket(s, server_hostname=host)
+                import ssl
+                s = ssl.wrap_socket(s, server_hostname=host)
 
             # ---- SEND REQUEST ----
             s.write(b"%s /%s HTTP/1.0\r\n" % (method, path))
@@ -132,8 +129,10 @@ def request(method, url, params=None, cookies=None, data=None, json=None,
                     s.write(b"\r\n")
 
             if json is not None:
-                import ujson
-                data = ujson.dumps(json)
+                # `json` is also this function's parameter, so bind the module
+                # under a different name.
+                import json as json_module
+                data = json_module.dumps(json)
                 s.write(b"Content-Type: application/json\r\n")
 
             if data:
