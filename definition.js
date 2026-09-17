@@ -234,20 +234,23 @@ Blockly.Python['uno_http_connect_wifi'] = function (block) {
 Blockly.Python['uno_telegram_get_method'] = function (block) {
   Blockly.Python.definitions_['import_http'] = 'import urequests';
   Blockly.Python.definitions_['import_gc'] = 'import gc';
+  Blockly.Python.definitions_['import_ujson'] = 'import ujson';
   var value_token = Blockly.Python.valueToCode(block, 'TOKEN', Blockly.Python.ORDER_ATOMIC);
   var value_id = Blockly.Python.valueToCode(block, 'ID', Blockly.Python.ORDER_ATOMIC);
   var value_messege = Blockly.Python.valueToCode(block, 'MESSEGE', Blockly.Python.ORDER_ATOMIC);
 
-  var telegram_url = `(''.join([str(x) for x in ['https://api.telegram.org/bot', ${value_token}, '/sendMessage?text=', ${value_messege}, '&chat_id=', ${value_id}]]))`;
-
-  console.log(telegram_url);
+  var telegram_url = `(''.join([str(x) for x in ['https://api.telegram.org/bot', ${value_token}, '/sendMessage']]))`;
 
   // TODO: Assemble Python into code variable.
   var workspace = block.workspace;
   workspace.createVariable('http_response');
 
   var code = `gc.collect()\n`;
-  code += `http_response = urequests.get(${telegram_url})\n`;
+  code += `url = ${telegram_url}\n`;  
+  code += `data = {"chat_id": ${value_id}, "text": ${value_messege}}\n`;
+  code += `http_response = urequests.post(url, data=ujson.dumps(data), headers={"Content-Type": "application/json"})\n`;
+  code += `print(http_response.text)\n`;
+  code += `http_response.close()\n`;
   return code;
 };
 
